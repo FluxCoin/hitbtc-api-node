@@ -39,10 +39,6 @@ module.exports = {
                 "properties": "never"
             }
         ],
-        "capitalized-comments": [
-            "error",
-            "always"
-        ],
         "class-methods-use-this": "error",
         "comma-dangle": ["error", "always-multiline"],
         "comma-spacing": [
