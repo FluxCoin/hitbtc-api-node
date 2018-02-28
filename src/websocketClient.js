@@ -1,5 +1,4 @@
 import WebSocket from 'ws';
-import crypto from 'crypto';
 import get from 'lodash/fp/get';
 import pipe from 'lodash/fp/pipe';
 
@@ -11,68 +10,54 @@ const withData = listener => pipe(
 
 export default class HitBTCWebsocketClient {
   constructor({ key, secret, isDemo = false }) {
-    this.key = key;
-    this.secret = secret;
     this.baseUrl = `${isDemo ? `demo-api` : `api`}.hitbtc.com`;
-    this.marketUrl = `ws://${this.baseUrl}:80`;
-    this.tradingUrl = `wss://${this.baseUrl}:8080`;
+    this.socketUrl = `ws://${this.baseUrl}/api/2/ws`;
     this.hasCredentials = key && secret;
 
-    this.marketSocket = new WebSocket(this.marketUrl);
+    this.socket = new WebSocket(this.socketUrl);
+
+    this.requestId = 0;
 
     if (this.hasCredentials) {
-      this.tradingSocket = new WebSocket(this.tradingUrl);
-      this.tradingSocket.addEventListener(`open`, () =>
-        this.tradingSocket.send(
-          this.createRequestData({ Login: {} }),
-        ),
-      );
+      this.addOnOpenListener(() => {
+        this.sendRequest(`login`, {
+          algo: `BASIC`,
+          pKey: key,
+          sKey: secret,
+        });
+      });
     }
   }
 
-  createRequestData = payload => {
-    const message = {
-      nonce: Date.now(),
-      payload,
-    };
-
-    const signature = crypto
-      .createHmac(`sha512`, this.secret)
-      .update(JSON.stringify(message))
-      .digest(`base64`);
-
-    message
-      .payload;
-
+  createRequest = (method, params = {}) => {
+    const id = this.requestId;
+    this.requestId += 1;
     return JSON.stringify({
-      apikey: this.key,
-      signature,
-      message,
+      method,
+      params,
+      id,
     });
-  };
+  }
 
-  addMarketMessageListener = listener =>
-    this.marketSocket.addEventListener(`message`, withData(listener));
+  sendRequest = (method, params) =>
+    this.socket.send(this.createRequest(method, params));
 
-  addTradingMessageListener = listener =>
-    this.tradingSocket.addEventListener(`message`, withData(listener));
+  addListener = listener =>
+    this.socket.addEventListener(`message`, withData(listener));
 
-  removeMarketMessageListener = listener =>
-    this.marketSocket.removeEventListener(`message`, withData(listener));
+  removeListener = listener =>
+    this.socket.removeEventListener(`message`, withData(listener));
 
-  removeTradingMessageListener = listener =>
-    this.tradingSocket.removeEventListener(`message`, withData(listener));
+  addEventListener = (event, listener) =>
+    this.socket.addEventListener(event, listener);
 
-  addMarketListener = (event, listener) =>
-    this.marketSocket.addEventListener(event, listener);
+  removeEventListener = (event, listener) =>
+    this.socket.removeEventListener(event, listener);
 
-  addTradingListener = (event, listener) =>
-    this.tradingSocket.addEventListener(event, listener);
+  addOnOpenListener = listener =>
+    this.socket.addEventListener(`open`, listener);
 
-  removeMarketListener = (event, listener) =>
-    this.marketSocket.removeEventListener(event, listener);
-
-  removeTradingListener = (event, listener) =>
-    this.tradingSocket.removeEventListener(event, listener);
+  removeOnOpenListener = listener =>
+    this.socket.addEventListener(`open`, listener);
 
 }
