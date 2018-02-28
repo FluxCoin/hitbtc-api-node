@@ -1,5 +1,7 @@
 # hitbtc-api
 
+## Warning -- Outdated README
+
 HitBTC API wrapper for Node.js
 
 ## Installation
