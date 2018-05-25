@@ -2,6 +2,7 @@ export interface IRESTParams {
     key: string;
     secret: string;
     isDemo?: boolean;
+    baseUrl?: string;
 }
 export declare type RESTMethod = "get" | "put" | "post" | "delete";
 export declare type CandlePeriod = "M1" | "M3" | "M5" | "M15" | "M30" | "H1" | "H4" | "D1" | "D7" | "1M";

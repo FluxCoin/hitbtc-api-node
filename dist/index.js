@@ -5,9 +5,9 @@ const qs_1 = require("qs");
 const ramda_1 = require("ramda");
 const websocketClient_1 = require("./websocketClient");
 class HitBTC {
-    constructor({ key, secret, isDemo = false }) {
+    constructor({ key, secret, isDemo = false, baseUrl }) {
         this.requestPublic = (endpoint, params = {}) => axios_1.default
-            .get(`${this.url}/public${endpoint}`, { params })
+            .get(`${this.baseUrl}/public${endpoint}`, { params })
             .then(ramda_1.prop(`data`))
             .catch(err => {
             throw ramda_1.path(["response", "data"], err);
@@ -23,7 +23,7 @@ class HitBTC {
                 },
                 params,
             };
-            const url = `${this.url}${endpoint}`;
+            const url = `${this.baseUrl}${endpoint}`;
             const result = method === "get" || method === "delete"
                 ? axios_1.default[method](url, config)
                 : axios_1.default[method](url, qs_1.stringify(params), config);
@@ -60,9 +60,13 @@ class HitBTC {
         this.transaction = (id, params) => this.requestPrivate(`/account/transactions/${id}`, params, `get`);
         this.key = key;
         this.secret = secret;
-        const subdomain = isDemo ? `demo-api` : `api`;
-        this.baseUrl = `https://${subdomain}.hitbtc.com`;
-        this.url = `${this.baseUrl}/api/2`;
+        if (baseUrl) {
+            this.baseUrl = baseUrl;
+        }
+        else {
+            const subdomain = isDemo ? `demo-api` : `api`;
+            this.baseUrl = `https://${subdomain}.hitbtc.com/api/v2`;
+        }
     }
 }
 HitBTC.WebsocketClient = websocketClient_1.default;

@@ -7,6 +7,7 @@ export interface IWebsocketParams {
     readonly key: string;
     readonly secret: string;
     readonly isDemo?: boolean;
+    readonly baseUrl?: string;
 }
 export declare type IWebsocketData = IBaseWebsocketData | IWebsocketBookData | IWebsocketTickerData;
 export interface IBaseWebsocketData {
@@ -62,11 +63,9 @@ export declare function isTickerMessage(data: IWebsocketData): data is IWebsocke
 export declare function isOrderbookMessage(data: IWebsocketData): data is IWebsocketBookData;
 export default class HitBTCWebsocketClient {
     baseUrl: string;
-    socketUrl: string;
     socket: WebSocket;
     private requestId;
-    private hasCredentials;
-    constructor({key, secret, isDemo}: IWebsocketParams);
+    constructor({key, secret, isDemo, baseUrl}: IWebsocketParams);
     createRequest: (method: string, params?: {}) => string;
     sendRequest: (method: string, params: any) => void;
     addListener: (listener: Listener) => void;

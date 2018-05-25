@@ -12,7 +12,7 @@ function isOrderbookMessage(data) {
 }
 exports.isOrderbookMessage = isOrderbookMessage;
 class HitBTCWebsocketClient {
-    constructor({ key, secret, isDemo = false }) {
+    constructor({ key, secret, isDemo = false, baseUrl }) {
         this.createRequest = (method, params = {}) => {
             const id = this.requestId;
             this.requestId += 1;
@@ -29,12 +29,17 @@ class HitBTCWebsocketClient {
         this.removeEventListener = (event, listener) => this.socket.removeEventListener(event, listener);
         this.addOnOpenListener = (listener) => this.socket.addEventListener(`open`, listener);
         this.removeOnOpenListener = (listener) => this.socket.addEventListener(`open`, listener);
-        this.baseUrl = `${isDemo ? `demo-api` : `api`}.hitbtc.com`;
-        this.socketUrl = `wss://${this.baseUrl}/api/2/ws`;
-        this.hasCredentials = !!(key && secret);
-        this.socket = new WebSocket(this.socketUrl);
+        if (baseUrl) {
+            this.baseUrl = baseUrl;
+        }
+        else {
+            const domain = `${isDemo ? `demo-api` : `api`}.hitbtc.com`;
+            this.baseUrl = `wss://${domain}/api/2/ws`;
+        }
+        const hasCredentials = !!(key && secret);
         this.requestId = 0;
-        if (this.hasCredentials) {
+        if (hasCredentials) {
+            this.socket = new WebSocket(this.baseUrl);
             this.addOnOpenListener(() => {
                 this.sendRequest(`login`, {
                     algo: `BASIC`,

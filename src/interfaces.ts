@@ -2,6 +2,7 @@ export interface IRESTParams {
   key: string;
   secret: string;
   isDemo?: boolean;
+  baseUrl?: string;
 }
 
 export type RESTMethod = "get" | "put" | "post" | "delete";

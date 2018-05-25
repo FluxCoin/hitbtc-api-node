@@ -12,6 +12,7 @@ export interface IWebsocketParams {
   readonly key: string;
   readonly secret: string;
   readonly isDemo?: boolean;
+  readonly baseUrl?: string;
 }
 
 export type IWebsocketData =
@@ -91,20 +92,25 @@ export function isOrderbookMessage(
 
 export default class HitBTCWebsocketClient {
   public baseUrl: string;
-  public socketUrl: string;
   public socket: WebSocket;
   private requestId: number;
-  private hasCredentials: boolean;
-  constructor({ key, secret, isDemo = false }: IWebsocketParams) {
-    this.baseUrl = `${isDemo ? `demo-api` : `api`}.hitbtc.com`;
-    this.socketUrl = `wss://${this.baseUrl}/api/2/ws`;
-    this.hasCredentials = !!(key && secret);
 
-    this.socket = new WebSocket(this.socketUrl);
+  constructor({ key, secret, isDemo = false, baseUrl }: IWebsocketParams) {
+    if (baseUrl) {
+      this.baseUrl = baseUrl;
+    } else {
+      const domain = `${isDemo ? `demo-api` : `api`}.hitbtc.com`;
+      this.baseUrl = `wss://${domain}/api/2/ws`;
+    }
+
+    const hasCredentials = !!(key && secret);
+
 
     this.requestId = 0;
 
-    if (this.hasCredentials) {
+    if (hasCredentials) {
+      this.socket = new WebSocket(this.baseUrl);
+
       this.addOnOpenListener(() => {
         this.sendRequest(`login`, {
           algo: `BASIC`,

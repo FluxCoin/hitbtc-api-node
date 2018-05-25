@@ -14,19 +14,22 @@ export default class HitBTC {
   public key: any;
   public secret: any;
   public baseUrl: string;
-  public url: string;
 
-  constructor({ key, secret, isDemo = false }: IRESTParams) {
+  constructor({ key, secret, isDemo = false, baseUrl }: IRESTParams) {
     this.key = key;
     this.secret = secret;
-    const subdomain = isDemo ? `demo-api` : `api`;
-    this.baseUrl = `https://${subdomain}.hitbtc.com`;
-    this.url = `${this.baseUrl}/api/2`;
+
+    if (baseUrl) {
+      this.baseUrl = baseUrl;
+    } else {
+      const subdomain = isDemo ? `demo-api` : `api`;
+      this.baseUrl = `https://${subdomain}.hitbtc.com/api/v2`;
+    }
   }
 
   public requestPublic = (endpoint: string, params = {}) =>
     axios
-      .get(`${this.url}/public${endpoint}`, { params })
+      .get(`${this.baseUrl}/public${endpoint}`, { params })
       .then(prop(`data`))
       .catch(err => {
         throw path(["response", "data"], err);
@@ -51,7 +54,7 @@ export default class HitBTC {
       params,
     };
 
-    const url = `${this.url}${endpoint}`;
+    const url = `${this.baseUrl}${endpoint}`;
 
     const result =
       method === "get" || method === "delete"
