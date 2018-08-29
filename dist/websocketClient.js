@@ -37,21 +37,18 @@ class HitBTCWebsocketClient {
             const domain = `${isDemo ? `demo-api` : `api`}.hitbtc.com`;
             this.baseUrl = `wss://${domain}/api/2/ws`;
         }
-        const hasCredentials = !!(key && secret);
         this.requestId = 0;
-        if (hasCredentials) {
-            const ReconnectingWebsocket = ReconnectingWS;
-            this.socket = new ReconnectingWebsocket(this.baseUrl, undefined, {
-                WebSocket: WS,
+        const ReconnectingWebsocket = ReconnectingWS;
+        this.socket = new ReconnectingWebsocket(this.baseUrl, undefined, {
+            WebSocket: WS,
+        });
+        this.addOnOpenListener(() => {
+            this.sendRequest(`login`, {
+                algo: `BASIC`,
+                pKey: key,
+                sKey: secret,
             });
-            this.addOnOpenListener(() => {
-                this.sendRequest(`login`, {
-                    algo: `BASIC`,
-                    pKey: key,
-                    sKey: secret,
-                });
-            });
-        }
+        });
     }
 }
 exports.default = HitBTCWebsocketClient;

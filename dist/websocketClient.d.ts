@@ -53,11 +53,6 @@ export interface ITickerParams {
     readonly timestamp: string;
     readonly symbol: string;
 }
-export interface IWebsocketMessageEvent {
-    readonly data: string;
-    readonly type: string;
-    readonly target: WebSocket;
-}
 export declare function isTickerMessage(data: IWebsocketData): data is IWebsocketTickerData;
 export declare function isOrderbookMessage(data: IWebsocketData): data is IWebsocketBookData;
 export default class HitBTCWebsocketClient {
